@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender" >
+        <encoder>
+            <pattern>[%t] %date{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{50} - %msg %X{1}%n </pattern>
+            <!--<pattern>%date{HH:mm:ss.SSS} %-5level %logger{50} - %msg %X{1}%n </pattern>-->
+        </encoder>
+    </appender>
+    <appender name="kafkaAppender" class="com.xiaoluo.klog.KafkaProducerAppender">
+        <kafkaAddress>localhost:9092</kafkaAddress>
+        <zookeeperAddress>localhost:2181</zookeeperAddress>
+        <kafkaTopic>klog</kafkaTopic>
+        <serviceName>producer</serviceName>
+        <encoder>
+            <pattern>[%t] %date{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{50} - %msg%n </pattern>
+        </encoder>
+    </appender>
+
+    <root level="DEBUG">
+        <appender-ref ref="console"/>
+        <appender-ref ref="kafkaAppender"></appender-ref>
+    </root>
+</configuration>
