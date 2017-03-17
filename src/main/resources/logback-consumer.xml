@@ -2,20 +2,21 @@
 <configuration>
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender" >
         <encoder>
-            <pattern>[%serviceName-%address] %t %date{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{50} - %msg %X{1}%n </pattern>
+            <pattern>[%t]%X{1} %date{HH:mm:ss.SSS} %-5level %logger{50}%L - %m%n </pattern>
             <!--<pattern>%date{HH:mm:ss.SSS} %-5level %logger{50} - %msg %X{1}%n </pattern>-->
         </encoder>
     </appender>
     <appender name="kafka" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/consumer.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/consumer.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>/logs/consumer.%d{yyyy-MM-dd}.log</fileNamePattern>
         </rollingPolicy>
         <encoder>
-            <pattern>[%serviceName-%address] %t %date{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{50} - %msg%n </pattern>
+            <pattern>[%t] %X{1} %date{HH:mm:ss.SSS} %-5level %logger{50}%L- %m%n </pattern>
         </encoder>
     </appender>
     <root level="DEBUG">
         <appender-ref ref="console"/>
+        <appender-ref ref="kafka"/>
     </root>
 </configuration>

@@ -1,8 +1,9 @@
-package com.xiaoluo.klog;
+package com.dafy.klog.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.management.ManagementFactory;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -12,9 +13,10 @@ import java.util.Enumeration;
 /**
  * Created by Administrator on 2016/4/1.
  */
-public class KLogNetUtil {
-    private static final Logger log= LoggerFactory.getLogger(KLogNetUtil.class);
-    private static String localhost=null;
+public class KlogUtil {
+    private static final Logger log= LoggerFactory.getLogger(KlogUtil.class);
+    private volatile static String localhost=null;
+    private volatile static String pid;
     public static String getLocalHost() throws SocketException {
         if(localhost!=null){
             return localhost;
@@ -32,13 +34,18 @@ public class KLogNetUtil {
                     if(!hostAddress.contains("localhost")&&!hostAddress.contains("127.0.0.1")){
                         log.debug("Get local host {}",hostAddress);
                         localhost=hostAddress;
-                        return hostAddress;
+                        return localhost;
                     }
                 }
-
-
             }
         }
         return null;
+    }
+    public static String getPid(){
+        if(pid==null){
+            String name = ManagementFactory.getRuntimeMXBean().getName();
+            pid = name.split("@")[0];
+        }
+        return pid;
     }
 }

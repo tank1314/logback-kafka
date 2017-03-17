@@ -1,4 +1,4 @@
-package com.xiaoluo.klog;
+package com.dafy.klog.logback;
 
 import ch.qos.logback.classic.pattern.ClassicConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -11,8 +11,8 @@ public class KafkaLogConverter {
         @Override
         public String convert(ILoggingEvent event) {
             if(event instanceof KLogEvent){
-                KLogEvent rpcLogEventVO=(KLogEvent)event;
-                return rpcLogEventVO.getServiceName();
+                KLogEvent kLogEvent=(KLogEvent)event;
+                return kLogEvent.getServiceName();
             }
             return "";
         }
@@ -23,6 +23,16 @@ public class KafkaLogConverter {
             if(event instanceof KLogEvent){
                 KLogEvent rpcLogEventVO=(KLogEvent)event;
                 return rpcLogEventVO.getAddress();
+            }
+            return "";
+        }
+    }
+    public static class PidConvert extends ClassicConverter{
+        @Override
+        public String convert(ILoggingEvent event) {
+            if(event instanceof KLogEvent){
+                KLogEvent rpcLogEventVO=(KLogEvent)event;
+                return rpcLogEventVO.getPid();
             }
             return "";
         }

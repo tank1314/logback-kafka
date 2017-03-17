@@ -1,4 +1,4 @@
-package com.xiaoluo.klog;
+package com.dafy.klog;
 
 import org.apache.kafka.common.serialization.Serializer;
 

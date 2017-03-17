@@ -1,16 +1,19 @@
-package com.xiaoluo.klog;
+package com.dafy.klog.producer;
 
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
-import ch.qos.logback.core.net.SocketConnector;
+import ch.qos.logback.core.OutputStreamAppender;
+import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import ch.qos.logback.core.spi.PreSerializationTransformer;
 import ch.qos.logback.core.util.Duration;
+import com.dafy.klog.logback.KLogEvent;
+import com.dafy.klog.logback.KLogSerializationTransformer;
+import com.dafy.klog.logback.KafkaLogConverter;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.InterruptException;
 
 import java.util.Properties;
@@ -22,19 +25,21 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by Administrator on 2016/4/1.
  */
-public class KafkaProducerAppender extends AppenderBase<ILoggingEvent> implements Runnable{
+public class KafkaProducerAppender extends UnsynchronizedAppenderBase<ILoggingEvent> implements Runnable{
     private Producer<String,String> kafkaProducer;
-    private int queueSize=1024;
+    private int queueSize=2048;
     private String kafkaAddress;
     private String zookeeperAddress;
     private String kafkaTopic;
-    private BlockingQueue<ILoggingEvent> queue= new LinkedBlockingDeque(this.queueSize);;
+    private BlockingQueue<KLogEvent> queue= new LinkedBlockingDeque(this.queueSize);
     private Duration eventDelayLimit = new Duration(100L);
     private PreSerializationTransformer transformer=new KLogSerializationTransformer();
     private String serviceName;
+    private boolean includeCallerData=false;
     static {
-        PatternLayout.defaultConverterMap.put("serviceName",KafkaLogConverter.ServiceNameConvert.class.getName());
-        PatternLayout.defaultConverterMap.put("address", KafkaLogConverter.AddressConvert.class.getName());
+        PatternLayout.defaultConverterMap.put("sn",KafkaLogConverter.ServiceNameConvert.class.getName());
+        PatternLayout.defaultConverterMap.put("addr", KafkaLogConverter.AddressConvert.class.getName());
+        PatternLayout.defaultConverterMap.put("pid", KafkaLogConverter.AddressConvert.class.getName());
     }
     @Override
     public void start() {
@@ -43,11 +48,6 @@ public class KafkaProducerAppender extends AppenderBase<ILoggingEvent> implement
             if(kafkaAddress==null) {
                 ++errorCount;
                 this.addError("No kafka address specify");
-            }
-
-            if(this.zookeeperAddress == null) {
-                ++errorCount;
-                this.addError("No zookeeper address specify");
             }
 
             if(this.queueSize < 0) {
@@ -70,7 +70,6 @@ public class KafkaProducerAppender extends AppenderBase<ILoggingEvent> implement
     }
     private void buildKafkaProducer(){
         Properties props=new Properties();
-        System.out.println("KafkaAddress--------------"+kafkaAddress);
         props.put("bootstrap.servers", kafkaAddress);
         props.put("acks", "all");
         props.put("retries", 0);
@@ -78,8 +77,9 @@ public class KafkaProducerAppender extends AppenderBase<ILoggingEvent> implement
         props.put("linger.ms", 1);
         props.put("buffer.memory", 33554432);
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer", "com.xiaoluo.klog.JavaSerializer");
+        props.put("value.serializer", "com.dafy.klog.JavaSerializer");
         kafkaProducer=new KafkaProducer(props);
+        this.addInfo("build kafka producer ok:kafkaAddress="+kafkaAddress);
     }
     @Override
     public void run() {
@@ -95,13 +95,9 @@ public class KafkaProducerAppender extends AppenderBase<ILoggingEvent> implement
     public void dispatchEvent(){
         while(true) {
             try{
-                ILoggingEvent event = queue.take();
-                KLogEvent kLogEvent=(KLogEvent) this.getTransformer().transform(event);
-                kLogEvent.setServiceName(this.serviceName);
-                if(kLogEvent instanceof KLogEvent){
-                    ProducerRecord record = new ProducerRecord(this.kafkaTopic, "", kLogEvent);
-                    Future<RecordMetadata> future=kafkaProducer.send(record);
-                }
+                KLogEvent event = queue.take();
+                ProducerRecord record = new ProducerRecord(this.kafkaTopic, this.serviceName, event);
+                Future<RecordMetadata> future=kafkaProducer.send(record);
             }catch (Exception e){
                 e.printStackTrace();
                 this.addInfo(this.kafkaAddress+":"+e);
@@ -120,12 +116,17 @@ public class KafkaProducerAppender extends AppenderBase<ILoggingEvent> implement
     protected void append(ILoggingEvent event) {
             if(event != null && this.isStarted()) {
                 try {
-                    boolean e = this.queue.offer(event, this.eventDelayLimit.getMilliseconds(), TimeUnit.MILLISECONDS);
+                    if(includeCallerData){
+                        event.getCallerData();
+                    }
+                    KLogEvent kLogEvent=(KLogEvent) this.getTransformer().transform(event);
+                    kLogEvent.setServiceName(this.serviceName);
+                    boolean e = this.queue.offer(kLogEvent, this.eventDelayLimit.getMilliseconds(), TimeUnit.MILLISECONDS);
                     if(!e) {
                         this.addInfo("Dropping event due to timeout limit of [" + this.eventDelayLimit + "] milliseconds being exceeded");
                     }
                 } catch (InterruptedException var3) {
-                    this.addError("Interrupted while appending event to SocketAppender", var3);
+                    this.addError("Interrupted while appending event to KakfaProducerAppender", var3);
                 }
 
             }
@@ -147,13 +148,6 @@ public class KafkaProducerAppender extends AppenderBase<ILoggingEvent> implement
         this.kafkaAddress = kafkaAddress;
     }
 
-    public String getZookeeperAddress() {
-        return zookeeperAddress;
-    }
-
-    public void setZookeeperAddress(String zookeeperAddress) {
-        this.zookeeperAddress = zookeeperAddress;
-    }
 
     public String getKafkaTopic() {
         return kafkaTopic;
@@ -163,11 +157,11 @@ public class KafkaProducerAppender extends AppenderBase<ILoggingEvent> implement
         this.kafkaTopic = kafkaTopic;
     }
 
-    public BlockingQueue<ILoggingEvent> getQueue() {
+    public BlockingQueue<KLogEvent> getQueue() {
         return queue;
     }
 
-    public void setQueue(BlockingQueue<ILoggingEvent> queue) {
+    public void setQueue(BlockingQueue<KLogEvent> queue) {
         this.queue = queue;
     }
 
@@ -203,4 +197,11 @@ public class KafkaProducerAppender extends AppenderBase<ILoggingEvent> implement
         this.serviceName = serviceName;
     }
 
+    public boolean isIncludeCallerData() {
+        return includeCallerData;
+    }
+
+    public void setIncludeCallerData(boolean includeCallerData) {
+        this.includeCallerData = includeCallerData;
+    }
 }

@@ -1,10 +1,11 @@
-package com.xiaoluo.klog;
+package com.dafy.klog.logback;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.classic.spi.LoggerContextVO;
 import ch.qos.logback.classic.spi.ThrowableProxyVO;
+import com.dafy.klog.util.KlogUtil;
 import org.slf4j.Marker;
 import org.slf4j.helpers.MessageFormatter;
 
@@ -19,6 +20,7 @@ import java.util.Map;
  * Created by Administrator on 2016/4/1.
  */
 public class KLogEvent implements ILoggingEvent,Serializable{
+    private static final long serialVersionUID = -4545963936567596171L;
     private String threadName;
     private String loggerName;
     private LoggerContextVO loggerContextVO;
@@ -33,6 +35,7 @@ public class KLogEvent implements ILoggingEvent,Serializable{
     private long timeStamp;
     private String serviceName;
     private String address;
+    private String pid;
     public KLogEvent() {
     }
 
@@ -48,13 +51,15 @@ public class KLogEvent implements ILoggingEvent,Serializable{
         ledo.mdcPropertyMap = le.getMDCPropertyMap();
         ledo.timeStamp = le.getTimeStamp();
         ledo.throwableProxy = ThrowableProxyVO.build(le.getThrowableProxy());
+        ledo.mdcPropertyMap=le.getMDCPropertyMap();
         String systemAddress=null;
         try{
-            systemAddress=KLogNetUtil.getLocalHost();
+            systemAddress= KlogUtil.getLocalHost();
         }catch (SocketException e){
             e.printStackTrace();
         }
         ledo.address=systemAddress==null?"Not specify":systemAddress;
+        ledo.pid=KlogUtil.getPid();
         if(le.hasCallerData()) {
             ledo.callerDataArray = le.getCallerData();
         }
@@ -182,6 +187,14 @@ public class KLogEvent implements ILoggingEvent,Serializable{
 
     public Map<String, String> getMdc() {
         return this.mdcPropertyMap;
+    }
+
+    public String getPid() {
+        return pid;
+    }
+
+    public void setPid(String pid) {
+        this.pid = pid;
     }
 
     public void prepareForDeferredProcessing() {

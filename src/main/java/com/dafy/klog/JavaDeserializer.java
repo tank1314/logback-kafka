@@ -1,4 +1,4 @@
-package com.xiaoluo.klog;
+package com.dafy.klog;
 
 import org.apache.kafka.common.serialization.Deserializer;
 
@@ -27,7 +27,7 @@ public class JavaDeserializer implements Deserializer<Object>{
         try {
             ByteArrayInputStream bis=new ByteArrayInputStream(bytes);
             ObjectInputStream ois=new ObjectInputStream(bis);
-            return (Serializable) ois.readObject();
+            return ois.readObject();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {

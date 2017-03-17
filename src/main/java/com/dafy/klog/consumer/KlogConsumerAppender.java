@@ -1,4 +1,4 @@
-package com.xiaoluo.klog;
+package com.dafy.klog.consumer;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
@@ -8,14 +8,14 @@ import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
 /**
  * Created by Caedmon on 2016/4/18.
  */
-public class KafkaConsumerAppender extends RollingFileAppender {
+public class KlogConsumerAppender extends RollingFileAppender {
     private String serviceName;
     private String address;
     private String fileNamePattern;
     private String logPattern;
     private String appenderName;
-    private LoggerContext context;
-    public KafkaConsumerAppender(LoggerContext context, String appenderName, String serviceName, String address, String fileNamePattern, String logPattern){
+    public KlogConsumerAppender(LoggerContext context, String appenderName, String serviceName,
+                                String address, String fileNamePattern, String logPattern){
         this.appenderName=appenderName;
         this.serviceName=serviceName;
         this.address=address;
@@ -28,7 +28,7 @@ public class KafkaConsumerAppender extends RollingFileAppender {
             return;
         }
         setName(appenderName);
-        setFile("logs/"+serviceName+"/"+address+"/service.log");
+        setFile("logs/"+serviceName+"/"+serviceName+"-"+address+".log");
         TimeBasedRollingPolicy policy=new TimeBasedRollingPolicy<>();
         policy.setFileNamePattern(fileNamePattern);
         policy.setParent(this);

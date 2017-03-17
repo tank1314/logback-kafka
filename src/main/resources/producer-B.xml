@@ -2,22 +2,21 @@
 <configuration>
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender" >
         <encoder>
-            <pattern>[%t] %date{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{50} - %msg %X{1}%n </pattern>
+            <pattern>[%t] %date{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{50} %L - %msg %X{1}%n </pattern>
             <!--<pattern>%date{HH:mm:ss.SSS} %-5level %logger{50} - %msg %X{1}%n </pattern>-->
         </encoder>
     </appender>
-    <appender name="kafkaAppender" class="com.xiaoluo.klog.KafkaProducerAppender">
+    <appender name="kafkaAppender" class="com.dafy.klog.producer.KafkaProducerAppender">
         <kafkaAddress>localhost:9092</kafkaAddress>
-        <zookeeperAddress>localhost:2181</zookeeperAddress>
+        <zookeeperAddress>zookeeper1.dafy.com:2181</zookeeperAddress>
         <kafkaTopic>klog</kafkaTopic>
-        <serviceName>producer</serviceName>
+        <serviceName>service-B</serviceName>
         <encoder>
-            <pattern>[%t] %date{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{50} - %msg%n </pattern>
+            <pattern>[%t] %date{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{50} %L - %m%n </pattern>
         </encoder>
     </appender>
 
     <root level="DEBUG">
-        <appender-ref ref="console"/>
         <appender-ref ref="kafkaAppender"></appender-ref>
     </root>
 </configuration>
