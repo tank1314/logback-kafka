@@ -10,7 +10,7 @@ start()
         VM_OPTS=${VM_OPTS}" "${line}
         done
         echo "Java VM PARAMS:" "${VM_OPTS}"
-        nohup java ${VM_OPTS} -classpath conf:lib/* -Dserver_id=$SERVER_ID com.xiaoluo.klog.KlogConsumerStartup >nohup.out 2>&1 &
+        nohup java ${VM_OPTS} -classpath conf:lib/* -Dserver_id=$SERVER_ID com.dafy.klog.consumer.KLogConsumerStartup >nohup.out 2>&1 &
         echo $! > pid
 }
 stop()

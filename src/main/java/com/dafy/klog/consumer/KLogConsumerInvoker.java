@@ -9,7 +9,6 @@ import com.dafy.klog.config.RedisConfig;
 import com.google.common.base.Strings;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.errors.WakeupException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.JedisPoolConfig;
@@ -23,19 +22,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Created by Caedmon on 2017/3/15.
  */
-public class KlogConsumerInvoker implements Runnable{
+public class KLogConsumerInvoker implements Runnable{
     private Properties properties;
     private int partition;
     private KafkaConsumer<String,Object> kafkaConsumer;
     private OffsetRecorder offsetRecorder;
     private AtomicBoolean closed=new AtomicBoolean(false);
     private LoggerContext context;
-    private static final Logger log= LoggerFactory.getLogger(KlogConsumerInvoker.class);
+    private static final Logger log= LoggerFactory.getLogger(KLogConsumerInvoker.class);
     /**
      * 不同appender的缓存
      * */
-    private static final Map<String,KlogConsumerAppender> appenderCache=new ConcurrentHashMap<>();
-    public KlogConsumerInvoker(Properties properties, LoggerContext context, int partition){
+    private static final Map<String,KLogConsumerAppender> appenderCache=new ConcurrentHashMap<>();
+    public KLogConsumerInvoker(Properties properties, LoggerContext context, int partition){
         this.properties=properties;
         this.context=context;
         this.partition=partition;
@@ -86,7 +85,7 @@ public class KlogConsumerInvoker implements Runnable{
                         continue;
                     }
                     KLogEvent event = (KLogEvent) record.value();
-                    KlogConsumerAppender appender=getAppender(event);
+                    KLogConsumerAppender appender=getAppender(event);
                     appender.doAppend(event);
                     lastRecordOffset=record.offset();
                 }
@@ -116,13 +115,13 @@ public class KlogConsumerInvoker implements Runnable{
     /**
      * 获取Appender
      * */
-    private KlogConsumerAppender getAppender(KLogEvent event){
+    private KLogConsumerAppender getAppender(KLogEvent event){
         String fileNamePattern=this.properties.getProperty("logback.fileName.pattern");
         String logPattern=this.properties.getProperty("logback.log.pattern");
         String appenderName=event.getServiceName()+"-"+event.getAddress();
-        KlogConsumerAppender appender=appenderCache.get(appenderName);
+        KLogConsumerAppender appender=appenderCache.get(appenderName);
         if(appender==null) {
-            appender=new KlogConsumerAppender(context,appenderName,event.getServiceName(),
+            appender=new KLogConsumerAppender(context,appenderName,event.getServiceName(),
                     event.getAddress(),fileNamePattern,
                     logPattern);
             appenderCache.put(appenderName, appender);

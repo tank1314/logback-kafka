@@ -6,13 +6,13 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 /**
  * Created by Administrator on 2016/4/15.
  */
-public class KafkaLogConverter {
+public class KLogConverter {
     public static class ServiceNameConvert extends ClassicConverter {
         @Override
         public String convert(ILoggingEvent event) {
             if(event instanceof KLogEvent){
-                KLogEvent kLogEvent=(KLogEvent)event;
-                return kLogEvent.getServiceName();
+                KLogEvent eventVO=(KLogEvent)event;
+                return eventVO.getServiceName();
             }
             return "";
         }
@@ -21,8 +21,8 @@ public class KafkaLogConverter {
         @Override
         public String convert(ILoggingEvent event) {
             if(event instanceof KLogEvent){
-                KLogEvent rpcLogEventVO=(KLogEvent)event;
-                return rpcLogEventVO.getAddress();
+                KLogEvent eventVO=(KLogEvent)event;
+                return eventVO.getAddress();
             }
             return "";
         }
@@ -31,8 +31,8 @@ public class KafkaLogConverter {
         @Override
         public String convert(ILoggingEvent event) {
             if(event instanceof KLogEvent){
-                KLogEvent rpcLogEventVO=(KLogEvent)event;
-                return rpcLogEventVO.getPid();
+                KLogEvent eventVO=(KLogEvent)event;
+                return eventVO.getPid();
             }
             return "";
         }

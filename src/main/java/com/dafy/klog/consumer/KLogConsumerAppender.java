@@ -8,13 +8,13 @@ import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
 /**
  * Created by Caedmon on 2016/4/18.
  */
-public class KlogConsumerAppender extends RollingFileAppender {
+public class KLogConsumerAppender extends RollingFileAppender {
     private String serviceName;
     private String address;
     private String fileNamePattern;
     private String logPattern;
     private String appenderName;
-    public KlogConsumerAppender(LoggerContext context, String appenderName, String serviceName,
+    public KLogConsumerAppender(LoggerContext context, String appenderName, String serviceName,
                                 String address, String fileNamePattern, String logPattern){
         this.appenderName=appenderName;
         this.serviceName=serviceName;

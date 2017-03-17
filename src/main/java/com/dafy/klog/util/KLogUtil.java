@@ -13,8 +13,8 @@ import java.util.Enumeration;
 /**
  * Created by Administrator on 2016/4/1.
  */
-public class KlogUtil {
-    private static final Logger log= LoggerFactory.getLogger(KlogUtil.class);
+public class KLogUtil {
+    private static final Logger log= LoggerFactory.getLogger(KLogUtil.class);
     private volatile static String localhost=null;
     private volatile static String pid;
     public static String getLocalHost() throws SocketException {

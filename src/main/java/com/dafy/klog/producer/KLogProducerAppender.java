@@ -2,14 +2,12 @@ package com.dafy.klog.producer;
 
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.AppenderBase;
-import ch.qos.logback.core.OutputStreamAppender;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import ch.qos.logback.core.spi.PreSerializationTransformer;
 import ch.qos.logback.core.util.Duration;
 import com.dafy.klog.logback.KLogEvent;
 import com.dafy.klog.logback.KLogSerializationTransformer;
-import com.dafy.klog.logback.KafkaLogConverter;
+import com.dafy.klog.logback.KLogConverter;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -25,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by Administrator on 2016/4/1.
  */
-public class KafkaProducerAppender extends UnsynchronizedAppenderBase<ILoggingEvent> implements Runnable{
+public class KLogProducerAppender extends UnsynchronizedAppenderBase<ILoggingEvent> implements Runnable{
     private Producer<String,String> kafkaProducer;
     private int queueSize=2048;
     private String kafkaAddress;
@@ -37,9 +35,9 @@ public class KafkaProducerAppender extends UnsynchronizedAppenderBase<ILoggingEv
     private String serviceName;
     private boolean includeCallerData=false;
     static {
-        PatternLayout.defaultConverterMap.put("sn",KafkaLogConverter.ServiceNameConvert.class.getName());
-        PatternLayout.defaultConverterMap.put("addr", KafkaLogConverter.AddressConvert.class.getName());
-        PatternLayout.defaultConverterMap.put("pid", KafkaLogConverter.AddressConvert.class.getName());
+        PatternLayout.defaultConverterMap.put("sn",KLogConverter.ServiceNameConvert.class.getName());
+        PatternLayout.defaultConverterMap.put("addr", KLogConverter.AddressConvert.class.getName());
+        PatternLayout.defaultConverterMap.put("pid", KLogConverter.AddressConvert.class.getName());
     }
     @Override
     public void start() {

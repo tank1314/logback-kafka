@@ -12,12 +12,12 @@ import java.util.concurrent.Executors;
 /**
  * Created by Caedmon on 2016/4/19.
  */
-public class ConsumerController {
+public class KLogConsumerController {
     private Properties properties;
     private LoggerContext context;
     private  ExecutorService executorService;
     private volatile boolean started;
-    public ConsumerController(Properties properties) throws Exception{
+    public KLogConsumerController(Properties properties) throws Exception{
         this.properties=properties;
         initContext();
     }
@@ -43,7 +43,7 @@ public class ConsumerController {
         }
         executorService=Executors.newFixedThreadPool(partition);
         for(int i=0;i<partition;i++){
-            KlogConsumerInvoker consumer=new KlogConsumerInvoker(properties,context,i);
+            KLogConsumerInvoker consumer=new KLogConsumerInvoker(properties,context,i);
             executorService.execute(consumer);
         }
         this.started=true;

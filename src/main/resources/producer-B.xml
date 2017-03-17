@@ -6,7 +6,7 @@
             <!--<pattern>%date{HH:mm:ss.SSS} %-5level %logger{50} - %msg %X{1}%n </pattern>-->
         </encoder>
     </appender>
-    <appender name="kafkaAppender" class="com.dafy.klog.producer.KafkaProducerAppender">
+    <appender name="kafkaAppender" class="com.dafy.klog.producer.KLogProducerAppender">
         <kafkaAddress>localhost:9092</kafkaAddress>
         <zookeeperAddress>zookeeper1.dafy.com:2181</zookeeperAddress>
         <kafkaTopic>klog</kafkaTopic>

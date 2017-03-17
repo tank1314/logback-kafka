@@ -5,7 +5,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.classic.spi.LoggerContextVO;
 import ch.qos.logback.classic.spi.ThrowableProxyVO;
-import com.dafy.klog.util.KlogUtil;
+import com.dafy.klog.util.KLogUtil;
 import org.slf4j.Marker;
 import org.slf4j.helpers.MessageFormatter;
 
@@ -54,12 +54,12 @@ public class KLogEvent implements ILoggingEvent,Serializable{
         ledo.mdcPropertyMap=le.getMDCPropertyMap();
         String systemAddress=null;
         try{
-            systemAddress= KlogUtil.getLocalHost();
+            systemAddress= KLogUtil.getLocalHost();
         }catch (SocketException e){
             e.printStackTrace();
         }
         ledo.address=systemAddress==null?"Not specify":systemAddress;
-        ledo.pid=KlogUtil.getPid();
+        ledo.pid= KLogUtil.getPid();
         if(le.hasCallerData()) {
             ledo.callerDataArray = le.getCallerData();
         }
